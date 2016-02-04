@@ -1,0 +1,40 @@
+{
+  "name": "datepicker",
+  "version": "1.0.0",
+  "description": "simple datepicker",
+  "main": "./picker.js",
+  "dependencies": {
+    "react": "*",
+    "react-dom": "*"
+  },
+  "devDependencies": {
+    "babel-cli": "*",
+    "babel-core": "*",
+    "babel-polyfill": "*",
+    "babel-plugin-syntax-jsx": "*",
+    "babel-plugin-transform-react-jsx": "*",
+    "babel-preset-es2015": "*",
+    "babel-preset-stage-0": "*",
+
+    "eslint": "*",
+    "eslint-plugin-react": "*",
+    "babel-eslint": "*",
+    "eslint-config-airbnb": "*"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "babel picker.jsx -o picker.js",
+    "watch": "nodemon -e jsx -w . -x \"npm run build\"",
+    "check": "eslint ."
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/mbme/datepicker.git"
+  },
+  "author": "",
+  "license": "GPL-3.0",
+  "bugs": {
+    "url": "https://github.com/mbme/datepicker/issues"
+  },
+  "homepage": "https://github.com/mbme/datepicker#readme"
+}

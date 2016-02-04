@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="description" content="demo">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title>Datepicker demo</title>
+
+    <script src="./node_modules/babel-polyfill/dist/polyfill.min.js"></script>
+    <script src="./node_modules/react/dist/react.min.js"></script>
+    <script src="./node_modules/react-dom/dist/react-dom.min.js"></script>
+
+    <script src="./picker.js"></script>
+    <link rel="stylesheet" type="text/css" href="./picker.css">
+
+    <style>
+      html, body, #container {
+        height: 100%;
+      }
+
+      #container {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+
+      #container .date-input {
+        height: 20px;
+        width: 250px;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="container">
+      <input class="date-input" type="text" data-format="" />
+    </div>
+  </body>
+</html>
