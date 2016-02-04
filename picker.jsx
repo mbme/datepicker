@@ -1,63 +1,161 @@
 /* global React, ReactDOM */
 (function () {
+  const TopBar = React.createClass({
+    displayName: 'TopBar',
+
+    render () {
+      let {
+        label,
+        onClickLeft,
+        onClickRight,
+        onClickCenter
+      } = this.props;
+
+      return (
+        <div className="Picker-top">
+          <div className="Picker-top-left" onClick={onClickLeft}>
+            &lt;
+          </div>
+          <div className="Picker-top-center" onClick={onClickCenter}>
+            {label}
+          </div>
+          <div className="Picker-top-right" onClick={onClickRight}>
+            &gt;
+          </div>
+        </div>
+      );
+    }
+  });
+
   const MonthView = React.createClass({
     displayName: 'MonthView',
 
+    getInitialState () {
+      return {
+        topLabel: 'September 2015'
+      };
+    },
+
+    nextRange () {
+
+    },
+
+    prevRange () {
+
+    },
+
     render () {
+      let { topLabel } = this.state;
+
       return (
         <div className="Picker-calendar Picker-month">
+          <TopBar label={topLabel}
+                  onClickLeft={this.prevRange}
+                  onClickCenter={this.props.onClickTopLabel}
+                  onClickRight={this.nextRange} />
           some month data
         </div>
       );
     }
   });
+
   const YearView = React.createClass({
     displayName: 'YearView',
 
+    getInitialState () {
+      return {
+        topLabel: '2015'
+      };
+    },
+
+    nextRange () {
+
+    },
+
+    prevRange () {
+
+    },
+
     render () {
+      let { topLabel } = this.state;
+
       return (
         <div className="Picker-calendar Picker-year">
+          <TopBar label={topLabel}
+                  onClickLeft={this.prevRange}
+                  onClickCenter={this.props.onClickTopLabel}
+                  onClickRight={this.nextRange} />
           some year data
         </div>
       );
     }
   });
+
   const YearRangeView = React.createClass({
     displayName: 'YearRangeView',
 
+    getInitialState () {
+      return {
+        topLabel: '2000 - 2015'
+      };
+    },
+
+    nextRange () {
+
+    },
+
+    prevRange () {
+
+    },
+
     render () {
+      let { topLabel } = this.state;
+
       return (
         <div className="Picker-calendar Picker-yearrange">
+          <TopBar label={topLabel}
+                  onClickLeft={this.prevRange}
+                  onClickCenter={this.props.onClickTopLabel}
+                  onClickRight={this.nextRange} />
           some year range data
         </div>
       );
     }
   });
 
+  const ViewType = {
+    MONTH: 'month',
+    YEAR: 'year',
+    YEAR_RANGE: 'year-range'
+  };
+
   const Picker = React.createClass({
     displayName: 'Picker',
 
     getInitialState () {
       return {
-        viewType: 'month'
+        viewType: ViewType.MONTH
       };
+    },
+
+    nextView (viewType) {
+      this.setState({ viewType });
     },
 
     render () {
       let { viewType } = this.state;
 
       let view;
-      if (viewType === 'month') {
-        view = <MonthView />;
-      } else if (viewType === 'year') {
-        view = <YearView />;
-      } else {
-        view = <YearRangeView />;
+      if (viewType === ViewType.MONTH) {
+        view = <MonthView onClickTopLabel={this.nextView.bind(this, ViewType.YEAR)} />;
+      } else if (viewType === ViewType.YEAR) {
+        view = <YearView onClickTopLabel={this.nextView.bind(this, ViewType.YEAR_RANGE)} />;
+      } else { // ViewType.YEAR_RANGE
+        view = <YearRangeView onClickTopLabel={this.nextView.bind(this, ViewType.MONTH)} />;
       }
 
       return (
         <div className="Picker">
-          <div className="Picker-top">September 2015</div>
           {view}
           <div className="Picker-bottom">Today</div>
         </div>

@@ -19,4 +19,20 @@
 .Picker-top {
   background-color: #5A5B5F;
   font-size: 14px;
+  padding: 5px;
+}
+
+.Picker-top > * {
+  display: inline-block;
+  text-align: center;
+  cursor: pointer;
+}
+
+.Picker-top .Picker-top-left,
+.Picker-top .Picker-top-right {
+  width: 20px;
+}
+
+.Picker-top .Picker-top-center {
+  width: calc(100% - 40px);
 }
