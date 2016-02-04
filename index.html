@@ -8,8 +8,8 @@
     <title>Datepicker demo</title>
 
     <script src="./node_modules/babel-polyfill/dist/polyfill.min.js"></script>
-    <script src="./node_modules/react/dist/react.min.js"></script>
-    <script src="./node_modules/react-dom/dist/react-dom.min.js"></script>
+    <script src="./node_modules/react/dist/react.js"></script>
+    <script src="./node_modules/react-dom/dist/react-dom.js"></script>
 
     <script src="./picker.js"></script>
     <link rel="stylesheet" type="text/css" href="./picker.css">
@@ -25,7 +25,7 @@
         justify-content: center;
       }
 
-      #container .date-input {
+      #date-input {
         height: 20px;
         width: 250px;
       }
@@ -33,7 +33,11 @@
   </head>
   <body>
     <div id="container">
-      <input class="date-input" type="text" data-format="" />
+      <input id="date-input" type="text" data-format="" />
     </div>
+    <script>
+      var input = document.getElementById('date-input');
+      Picker.install(input);
+    </script>
   </body>
 </html>

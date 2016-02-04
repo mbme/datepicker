@@ -1,0 +1,22 @@
+.Datepicker-wrapper {
+  display: none;
+
+  position: absolute;
+  width: 250px;
+  height: 270px;
+}
+
+.Datepicker-wrapper.is-visible {
+  display: block;
+}
+
+.Picker {
+  background-color: #303437;
+  color: #F3F3F3;
+  height: 100%;
+}
+
+.Picker-top {
+  background-color: #5A5B5F;
+  font-size: 14px;
+}
