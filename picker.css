@@ -46,8 +46,7 @@
   table-layout: fixed;
   width: 100%;
 
-  padding-top: 5px;
-  padding-right: 10px;
+  padding: 5px 5px 0;
 
   cursor: default;
 }
@@ -57,7 +56,7 @@
 }
 
 .Picker-calendar table tr {
-  text-align: right;
+  text-align: center;
 }
 
 .Picker-calendar table td {
@@ -68,4 +67,10 @@
 
 .Picker-calendar table td.is-current-month {
   color: #D6D6D7;
+}
+
+.Picker-calendar table td.is-selected {
+  color: inherit;
+  background-color: #E8736F;
+  border-radius: 50%;
 }

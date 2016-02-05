@@ -30,31 +30,26 @@
     displayName: 'MonthView',
 
     getInitialState () {
-      let { year, month } = this.props;
+      let { selectedDate } = this.props;
       return {
-        date: moment({ year, month })
+        range: moment({
+          year: selectedDate.year(),
+          month: selectedDate.month()
+        })
       };
     },
 
     nextRange () {
-      let { date } = this.state;
       this.setState({
-        date: moment(date).add(1, 'months')
+        range: moment(this.state.range).add(1, 'months')
       });
     },
 
     prevRange () {
-      let { date } = this.state;
       this.setState({
-        date: moment(date).subtract(1, 'months')
+        range: moment(this.state.range).subtract(1, 'months')
       });
     },
-
-    tableHeader: (
-      <thead>
-        <tr>{moment.weekdaysShort().map(day => <th key={day}>{day}</th>)}</tr>
-      </thead>
-    ),
 
     generateWeekItems (date, currentMonth) {
       let items = [];
@@ -68,46 +63,56 @@
         if (day.month() === currentMonth) {
           classes.push('is-current-month');
         }
+        if (day.isSame(this.props.selectedDate, 'day')) {
+          classes.push('is-selected');
+        }
+
+        // align numbers with optional nbsp
+        let dayStr = day.date().toString();
+        if (dayStr.length === 1) {
+          dayStr = '&nbsp;' + dayStr;
+        }
 
         items.push(
           <td key={day.date()}
               className={classes.join(' ')}
-              onClick={this.props.onDatePicked.bind(null, day)} >
-            {day.date()}
-          </td>
+              onClick={this.props.onDateSelected.bind(null, day)}
+              dangerouslySetInnerHTML={{ __html: dayStr }} />
         );
       }
 
       return items;
     },
 
-    generateTable (date) {
+    generateTable (range) {
       let rows = [];
 
-      let week = moment(date);
+      let week = moment(range);
       for (let i = 0; i < 6; i += 1) {
-        rows.push(<tr key={week.week()}>{this.generateWeekItems(week, date.month())}</tr>);
+        rows.push(<tr key={week.week()}>{this.generateWeekItems(week, range.month())}</tr>);
         week.add(1, 'weeks');
       }
 
       return (
         <table>
-          {this.tableHeader}
+          <thead>
+            <tr>{moment.weekdaysShort().map(day => <th key={day}>{day}</th>)}</tr>
+          </thead>
           <tbody>{rows}</tbody>
         </table>
       );
     },
 
     render () {
-      let { date } = this.state;
+      let { range } = this.state;
 
       return (
         <div className="Picker-calendar Picker-month">
-          <TopBar label={date.format('MMMM YYYY')}
+          <TopBar label={range.format('MMMM YYYY')}
                   onClickLeft={this.prevRange}
                   onClickCenter={this.props.onClickTopLabel}
                   onClickRight={this.nextRange} />
-          {this.generateTable(date)}
+          {this.generateTable(range)}
         </div>
       );
     }
@@ -188,7 +193,8 @@
 
     getInitialState () {
       return {
-        viewType: ViewType.MONTH
+        viewType: ViewType.MONTH,
+        selectedDate: moment()
       };
     },
 
@@ -196,20 +202,19 @@
       this.setState({ viewType });
     },
 
-    onDatePicked (date) {
-      console.error('new date picked', date.toString());
+    onDateSelected (selectedDate) {
+      this.setState({ selectedDate });
     },
 
     render () {
-      let { viewType } = this.state;
+      let { viewType, selectedDate } = this.state;
 
       let view;
       if (viewType === ViewType.MONTH) {
         view = (
-          <MonthView year={2015}
-                     month={8}
+          <MonthView selectedDate={selectedDate}
                      onClickTopLabel={this.nextView.bind(this, ViewType.YEAR)}
-                     onDatePicked={this.onDatePicked} />
+                     onDateSelected={this.onDateSelected} />
         );
       } else if (viewType === ViewType.YEAR) {
         view = <YearView onClickTopLabel={this.nextView.bind(this, ViewType.YEAR_RANGE)} />;
