@@ -224,7 +224,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 
         // highlight current month
         // check year and month
-        if (day.isSame(today, 'day')) {
+        if (day.isSame(today, 'month')) {
           classes.push('is-today');
         }
 
@@ -323,7 +323,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 
         // highlight current year
         // check year
-        if (day.isSame(today, 'day')) {
+        if (day.isSame(today, 'year')) {
           classes.push('is-today');
         }
 
@@ -525,7 +525,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
       // show picker when input is focused
       el.addEventListener('click', function (evt) {
         picker.show();
-        window.addEventListener('click', clickHandler);
+        window.addEventListener('click', clickHandler, true);
 
         // stop propagation to not to trigger clickHandler
         evt.stopPropagation();
