@@ -44,7 +44,9 @@
 
 .Picker-calendar table {
   table-layout: fixed;
+
   width: 100%;
+  height: 200px;
 
   padding: 5px 5px 0;
 
@@ -65,12 +67,16 @@
   cursor: pointer;
 }
 
-.Picker-calendar table td.is-current-month {
-  color: #D6D6D7;
-}
-
 .Picker-calendar table td.is-selected {
   color: inherit;
   background-color: #E8736F;
   border-radius: 50%;
 }
+
+/* MONTH PICKER */
+
+.Picker-month table td.is-current-month {
+  color: #D6D6D7;
+}
+
+/* YEAR PICKER */

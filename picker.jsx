@@ -52,6 +52,8 @@
     },
 
     generateWeekItems (date, currentMonth) {
+      let { selectedDate, onDateSelected } = this.props;
+
       let items = [];
 
       let startOfWeek = moment(date).startOf('week');
@@ -63,7 +65,9 @@
         if (day.month() === currentMonth) {
           classes.push('is-current-month');
         }
-        if (day.isSame(this.props.selectedDate, 'day')) {
+
+        // check year, month and day
+        if (day.isSame(selectedDate, 'day')) {
           classes.push('is-selected');
         }
 
@@ -76,8 +80,9 @@
         items.push(
           <td key={day.date()}
               className={classes.join(' ')}
-              onClick={this.props.onDateSelected.bind(null, day)}
-              dangerouslySetInnerHTML={{ __html: dayStr }} />
+              onClick={onDateSelected.bind(null, day)}
+              dangerouslySetInnerHTML={{ __html: dayStr }} >
+          </td>
         );
       }
 
@@ -96,7 +101,11 @@
       return (
         <table>
           <thead>
-            <tr>{moment.weekdaysShort().map(day => <th key={day}>{day}</th>)}</tr>
+            <tr>
+              {moment.weekdaysShort().map(
+                 day => <th key={day}>{day}</th>
+               )}
+            </tr>
           </thead>
           <tbody>{rows}</tbody>
         </table>
@@ -123,28 +132,77 @@
 
     getInitialState () {
       return {
-        topLabel: '2015'
+        year: this.props.selectedDate.year()
       };
     },
 
     nextRange () {
-
+      this.setState({
+        year: this.state.year += 1
+      });
     },
 
     prevRange () {
+      this.setState({
+        year: this.state.year -= 1
+      });
+    },
 
+    generateTable () {
+      let { selectedDate, onDateSelected } = this.props;
+      let { year } = this.state;
+
+      let cells = [];
+      for (let i = 0; i < 12; i += 1) {
+        let day = moment({
+          year,
+          month: i,
+          date: selectedDate.date()
+        });
+
+        let classes = [];
+
+        // check year and month
+        if (day.isSame(selectedDate, 'month')) {
+          classes.push('is-selected');
+        }
+
+        let label = day.format('MMM');
+        cells.push(
+          <td key={label}
+              className={classes.join(' ')}
+              onClick={onDateSelected.bind(null, day)}>
+            {label}
+          </td>
+        );
+      }
+
+      let rows = [];
+      for (let i = 0; i < 12; i += 3) {
+        rows.push(
+          <tr key={i}>
+            {cells[i]}
+            {cells[i + 1]}
+            {cells[i + 2]}
+          </tr>
+        );
+      }
+
+      return (
+        <table>
+          <tbody>{rows}</tbody>
+        </table>
+      );
     },
 
     render () {
-      let { topLabel } = this.state;
-
       return (
         <div className="Picker-calendar Picker-year">
-          <TopBar label={topLabel}
+          <TopBar label={this.state.year}
                   onClickLeft={this.prevRange}
                   onClickCenter={this.props.onClickTopLabel}
                   onClickRight={this.nextRange} />
-          some year data
+          {this.generateTable()}
         </div>
       );
     }
@@ -217,9 +275,17 @@
                      onDateSelected={this.onDateSelected} />
         );
       } else if (viewType === ViewType.YEAR) {
-        view = <YearView onClickTopLabel={this.nextView.bind(this, ViewType.YEAR_RANGE)} />;
+        view = (
+          <YearView selectedDate={selectedDate}
+                    onClickTopLabel={this.nextView.bind(this, ViewType.YEAR_RANGE)}
+                    onDateSelected={this.onDateSelected} />
+        );
       } else { // ViewType.YEAR_RANGE
-        view = <YearRangeView onClickTopLabel={this.nextView.bind(this, ViewType.MONTH)} />;
+        view = (
+          <YearRangeView selectedDate={selectedDate}
+                         onClickTopLabel={this.nextView.bind(this, ViewType.MONTH)}
+                         onDateSelected={this.onDateSelected} />
+        );
       }
 
       return (
