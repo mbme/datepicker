@@ -386,6 +386,7 @@
 
     onDateSelected (selectedDate) {
       this.setState({ selectedDate });
+      this.props.onDateSelected(selectedDate);
     },
 
     onYearSelected (selectedDate) {
@@ -434,46 +435,85 @@
   }
 
   class Datepicker {
-    constructor (el) {
+    constructor (el, onDateSelected) {
       this.el = el;
+      this.isVisible = false;
 
       this.wrapper = document.createElement('div');
       this.wrapper.classList.add('Datepicker-wrapper');
       document.body.appendChild(this.wrapper);
 
       ReactDOM.render(
-        <Picker />,
+        <Picker onDateSelected={onDateSelected}/>,
         this.wrapper
       );
     }
 
     show () {
-      let { x, y } = getElementPos(this.el);
-      let elHeight = this.el.offsetHeight;
-      this.wrapper.style.top = `${y + elHeight}px`;
-      this.wrapper.style.left = `${x}px`;
+      if (this.isVisible) {
+        return;
+      }
+      this.isVisible = true;
+      this.updatePosition();
 
       this.wrapper.classList.add('is-visible');
     }
 
     hide () {
-
+      this.wrapper.classList.remove('is-visible');
+      this.isVisible = false;
     }
 
     updatePosition () {
-
+      let { x, y } = getElementPos(this.el);
+      let elHeight = this.el.offsetHeight;
+      this.wrapper.style.top = `${y + elHeight}px`;
+      this.wrapper.style.left = `${x}px`;
     }
 
     close () {
-
+      ReactDOM.unmountComponentAtNode(this.wrapper);
+      this.wrapper.parentNode.removeChild(this.wrapper);
     }
   }
 
   window.Picker = {
+    Datepicker,
+
     install (el) {
-      let picker = new Datepicker(el);
-      picker.show();
-      /* el.addEventListener('click', ::picker.show); */
+      let picker = new Datepicker(el, function (date) {
+        el.value = date.format('MMMM D YYYY'); // eslint-disable-line no-param-reassign
+      });
+
+      // prevent editing
+      el.addEventListener('keypress', function (evt) {
+        evt.stopPropagation();
+        evt.preventDefault();
+      });
+
+      function clickHandler (evt) {
+        // hide picker if clicked on anything outside of it
+        if (!picker.wrapper.contains(evt.target)) {
+          picker.hide();
+          window.removeEventListener('click', clickHandler);
+        }
+      }
+
+      // show picker when input is focused
+      el.addEventListener('click', function (evt) {
+        picker.show();
+        window.addEventListener('click', clickHandler);
+
+        // stop propagation to not to trigger clickHandler
+        evt.stopPropagation();
+      });
+
+      // update picker position on resize
+      window.addEventListener('resize', function () {
+        if (picker.isVisible) {
+          picker.updatePosition();
+        }
+      });
       return picker;
     }
   };
