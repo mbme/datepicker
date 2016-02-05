@@ -372,8 +372,30 @@
       this.setState({ viewType });
     },
 
+    goToYearView () {
+      this.nextView(ViewType.YEAR);
+    },
+
+    goToYearRangeView () {
+      this.nextView(ViewType.YEAR_RANGE);
+    },
+
+    goToMonthView () {
+      this.nextView(ViewType.MONTH);
+    },
+
     onDateSelected (selectedDate) {
       this.setState({ selectedDate });
+    },
+
+    onYearSelected (selectedDate) {
+      this.onDateSelected(selectedDate);
+      this.goToMonthView();
+    },
+
+    onYearFromRangeSelected (selectedDate) {
+      this.onDateSelected(selectedDate);
+      this.goToYearView();
     },
 
     render () {
@@ -383,20 +405,20 @@
       if (viewType === ViewType.MONTH) {
         view = (
           <MonthView selectedDate={selectedDate}
-                     onClickTopLabel={this.nextView.bind(this, ViewType.YEAR)}
+                     onClickTopLabel={this.goToYearView}
                      onDateSelected={this.onDateSelected} />
         );
       } else if (viewType === ViewType.YEAR) {
         view = (
           <YearView selectedDate={selectedDate}
-                    onClickTopLabel={this.nextView.bind(this, ViewType.YEAR_RANGE)}
-                    onDateSelected={this.onDateSelected} />
+                    onClickTopLabel={this.goToYearRangeView}
+                    onDateSelected={this.onYearSelected} />
         );
       } else { // ViewType.YEAR_RANGE
         view = (
           <YearRangeView selectedDate={selectedDate}
-                         onClickTopLabel={this.nextView.bind(this, ViewType.MONTH)}
-                         onDateSelected={this.onDateSelected} />
+                         onClickTopLabel={this.goToMonthView}
+                         onDateSelected={this.onYearFromRangeSelected} />
         );
       }
 
