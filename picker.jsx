@@ -208,33 +208,86 @@
     }
   });
 
+  const YEARS_RANGE = 16;
   const YearRangeView = React.createClass({
     displayName: 'YearRangeView',
 
     getInitialState () {
       return {
-        topLabel: '2000 - 2015'
+        rangeStart: this.props.selectedDate.year() - 8
       };
     },
 
     nextRange () {
-
+      this.setState({
+        rangeStart: this.state.rangeStart += YEARS_RANGE
+      });
     },
 
     prevRange () {
+      this.setState({
+        rangeStart: this.state.rangeStart -= YEARS_RANGE
+      });
+    },
 
+    generateTable () {
+      let { selectedDate, onDateSelected } = this.props;
+      let { rangeStart } = this.state;
+
+      let cells = [];
+      for (let i = 0; i < YEARS_RANGE; i += 1) {
+        let day = moment({
+          year: rangeStart + i,
+          month: selectedDate.month(),
+          date: selectedDate.date()
+        });
+
+        let classes = [];
+
+        // check year
+        if (day.isSame(selectedDate, 'year')) {
+          classes.push('is-selected');
+        }
+
+        cells.push(
+          <td key={day.year()}
+              className={classes.join(' ')}
+              onClick={onDateSelected.bind(null, day)}>
+            {day.year()}
+          </td>
+        );
+      }
+
+      let rows = [];
+      for (let i = 0; i < YEARS_RANGE; i += 4) {
+        rows.push(
+          <tr key={i}>
+            {cells[i]}
+            {cells[i + 1]}
+            {cells[i + 2]}
+            {cells[i + 3]}
+          </tr>
+        );
+      }
+
+      return (
+        <table>
+          <tbody>{rows}</tbody>
+        </table>
+      );
     },
 
     render () {
-      let { topLabel } = this.state;
+      let { rangeStart } = this.state;
 
+      let topLabel = `${rangeStart} - ${rangeStart + YEARS_RANGE - 1}`;
       return (
         <div className="Picker-calendar Picker-yearrange">
           <TopBar label={topLabel}
                   onClickLeft={this.prevRange}
                   onClickCenter={this.props.onClickTopLabel}
                   onClickRight={this.nextRange} />
-          some year range data
+          {this.generateTable()}
         </div>
       );
     }
