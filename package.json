@@ -6,12 +6,12 @@
   "dependencies": {
     "react": "*",
     "react-dom": "*",
-    "moment": "*"
+    "moment": "*",
+    "babel-polyfill": "*"
   },
   "devDependencies": {
     "babel-cli": "*",
     "babel-core": "*",
-    "babel-polyfill": "*",
     "babel-plugin-syntax-jsx": "*",
     "babel-plugin-transform-react-jsx": "*",
     "babel-preset-es2015": "*",
