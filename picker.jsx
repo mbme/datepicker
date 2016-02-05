@@ -26,6 +26,18 @@
     }
   });
 
+  const BottomBar = React.createClass({
+    displayName: 'BottomBar',
+
+    render () {
+      return (
+        <div className="Picker-bottom" onClick={this.props.onClick}>
+          Today
+        </div>
+      );
+    }
+  });
+
   const MonthView = React.createClass({
     displayName: 'MonthView',
 
@@ -49,6 +61,10 @@
       this.setState({
         range: moment(this.state.range).subtract(1, 'months')
       });
+    },
+
+    showToday () {
+      this.setState(this.getInitialState());
     },
 
     generateWeekItems (date, currentMonth) {
@@ -116,12 +132,13 @@
       let { range } = this.state;
 
       return (
-        <div className="Picker-calendar Picker-month">
+        <div className="Picker Picker-month">
           <TopBar label={range.format('MMMM YYYY')}
                   onClickLeft={this.prevRange}
                   onClickCenter={this.props.onClickTopLabel}
                   onClickRight={this.nextRange} />
           {this.generateTable(range)}
+          <BottomBar onClick={this.showToday} />
         </div>
       );
     }
@@ -146,6 +163,10 @@
       this.setState({
         year: this.state.year -= 1
       });
+    },
+
+    showToday () {
+      this.setState(this.getInitialState());
     },
 
     generateTable () {
@@ -197,12 +218,13 @@
 
     render () {
       return (
-        <div className="Picker-calendar Picker-year">
+        <div className="Picker Picker-year">
           <TopBar label={this.state.year}
                   onClickLeft={this.prevRange}
                   onClickCenter={this.props.onClickTopLabel}
                   onClickRight={this.nextRange} />
           {this.generateTable()}
+          <BottomBar onClick={this.showToday} />
         </div>
       );
     }
@@ -228,6 +250,10 @@
       this.setState({
         rangeStart: this.state.rangeStart -= YEARS_RANGE
       });
+    },
+
+    showToday () {
+      this.setState(this.getInitialState());
     },
 
     generateTable () {
@@ -282,12 +308,13 @@
 
       let topLabel = `${rangeStart} - ${rangeStart + YEARS_RANGE - 1}`;
       return (
-        <div className="Picker-calendar Picker-yearrange">
+        <div className="Picker Picker-yearrange">
           <TopBar label={topLabel}
                   onClickLeft={this.prevRange}
                   onClickCenter={this.props.onClickTopLabel}
                   onClickRight={this.nextRange} />
           {this.generateTable()}
+          <BottomBar onClick={this.showToday} />
         </div>
       );
     }
@@ -341,12 +368,7 @@
         );
       }
 
-      return (
-        <div className="Picker">
-          {view}
-          <div className="Picker-bottom">Today</div>
-        </div>
-      );
+      return view;
     }
   });
 
@@ -381,6 +403,10 @@
     }
 
     hide () {
+
+    }
+
+    updatePosition () {
 
     }
 

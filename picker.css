@@ -3,7 +3,6 @@
 
   position: absolute;
   width: 250px;
-  height: 270px;
 
   font-size: 14px;
 }
@@ -13,21 +12,23 @@
 }
 
 .Picker {
-  background-color: #303437;
   color: #F3F3F3;
+  background-color: #303437;
+
   height: 100%;
+
+  text-align: center;
 }
 
 /* TOP BAR */
 
 .Picker-top {
   background-color: #5A5B5F;
-  padding: 5px;
+  padding: 10px 5px;
 }
 
 .Picker-top > * {
   display: inline-block;
-  text-align: center;
   cursor: pointer;
 }
 
@@ -42,7 +43,7 @@
 
 /* CENTRAL AREA */
 
-.Picker-calendar table {
+.Picker table {
   table-layout: fixed;
 
   width: 100%;
@@ -53,21 +54,21 @@
   cursor: default;
 }
 
-.Picker-calendar table th {
+.Picker table th {
   color: #FBFBFB;
 }
 
-.Picker-calendar table tr {
+.Picker table tr {
   text-align: center;
 }
 
-.Picker-calendar table td {
+.Picker table td {
   padding: 5px 0;
   color: #65666A;
   cursor: pointer;
 }
 
-.Picker-calendar table td.is-selected {
+.Picker table td.is-selected {
   color: inherit;
   background-color: #E8736F;
   border-radius: 50%;
@@ -75,8 +76,20 @@
 
 /* MONTH PICKER */
 
-.Picker-month table td.is-current-month {
+.Picker-month .is-current-month {
   color: #D6D6D7;
 }
 
-/* YEAR PICKER */
+/* BOTTOM BAR */
+
+.Picker-bottom {
+  margin: 10px 0;
+  padding: 7px 37px;
+
+  display: inline-block;
+
+  background-color: #282A2D;
+  border-radius: 15px;
+
+  cursor: pointer;
+}

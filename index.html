@@ -18,24 +18,20 @@
     <style>
       html, body, #container {
         height: 100%;
-      }
-
-      #container {
-        display: flex;
-        align-items: center;
-        justify-content: center;
+        background-color: #d3d3d3;
       }
 
       #date-input {
+        display: block;
+        margin: 100px auto;
+
         height: 20px;
         width: 250px;
       }
     </style>
   </head>
   <body>
-    <div id="container">
-      <input id="date-input" type="text" data-format="" />
-    </div>
+    <input id="date-input" type="text" data-format="" />
     <script>
       var input = document.getElementById('date-input');
       Picker.install(input);
