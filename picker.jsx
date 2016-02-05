@@ -64,7 +64,9 @@
     },
 
     showToday () {
-      this.setState(this.getInitialState());
+      this.setState({
+        range: moment()
+      });
     },
 
     generateWeekItems (date, currentMonth) {
@@ -73,6 +75,7 @@
       let items = [];
 
       let startOfWeek = moment(date).startOf('week');
+      let today = moment();
 
       for (let i = 0; i < 7; i += 1) {
         let day = moment(startOfWeek).add(i, 'days');
@@ -82,9 +85,16 @@
           classes.push('is-current-month');
         }
 
+        // highlight selected day
         // check year, month and day
         if (day.isSame(selectedDate, 'day')) {
           classes.push('is-selected');
+        }
+
+        // highlight current date
+        // check year, month and day
+        if (day.isSame(today, 'day')) {
+          classes.push('is-today');
         }
 
         // align numbers with optional nbsp
@@ -166,12 +176,16 @@
     },
 
     showToday () {
-      this.setState(this.getInitialState());
+      this.setState({
+        year: moment().year()
+      });
     },
 
     generateTable () {
       let { selectedDate, onDateSelected } = this.props;
       let { year } = this.state;
+
+      let today = moment();
 
       let cells = [];
       for (let i = 0; i < 12; i += 1) {
@@ -183,9 +197,16 @@
 
         let classes = [];
 
+        // highlight selected month
         // check year and month
         if (day.isSame(selectedDate, 'month')) {
           classes.push('is-selected');
+        }
+
+        // highlight current month
+        // check year and month
+        if (day.isSame(today, 'day')) {
+          classes.push('is-today');
         }
 
         let label = day.format('MMM');
@@ -253,12 +274,16 @@
     },
 
     showToday () {
-      this.setState(this.getInitialState());
+      this.setState({
+        rangeStart: moment().year() - 8
+      });
     },
 
     generateTable () {
       let { selectedDate, onDateSelected } = this.props;
       let { rangeStart } = this.state;
+
+      let today = moment();
 
       let cells = [];
       for (let i = 0; i < YEARS_RANGE; i += 1) {
@@ -270,9 +295,16 @@
 
         let classes = [];
 
+        // highlight selected year
         // check year
         if (day.isSame(selectedDate, 'year')) {
           classes.push('is-selected');
+        }
+
+        // highlight current year
+        // check year
+        if (day.isSame(today, 'day')) {
+          classes.push('is-today');
         }
 
         cells.push(

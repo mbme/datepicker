@@ -68,6 +68,12 @@
   cursor: pointer;
 }
 
+.Picker table td.is-today {
+  color: #0F0F0F;
+  background-color: #FFDB99;
+  border-radius: 50%;
+}
+
 .Picker table td.is-selected {
   color: inherit;
   background-color: #E8736F;
