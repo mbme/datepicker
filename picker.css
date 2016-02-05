@@ -4,6 +4,8 @@
   position: absolute;
   width: 250px;
   height: 270px;
+
+  font-size: 14px;
 }
 
 .Datepicker-wrapper.is-visible {
@@ -16,9 +18,10 @@
   height: 100%;
 }
 
+/* TOP BAR */
+
 .Picker-top {
   background-color: #5A5B5F;
-  font-size: 14px;
   padding: 5px;
 }
 
@@ -35,4 +38,34 @@
 
 .Picker-top .Picker-top-center {
   width: calc(100% - 40px);
+}
+
+/* CENTRAL AREA */
+
+.Picker-calendar table {
+  table-layout: fixed;
+  width: 100%;
+
+  padding-top: 5px;
+  padding-right: 10px;
+
+  cursor: default;
+}
+
+.Picker-calendar table th {
+  color: #FBFBFB;
+}
+
+.Picker-calendar table tr {
+  text-align: right;
+}
+
+.Picker-calendar table td {
+  padding: 5px 0;
+  color: #65666A;
+  cursor: pointer;
+}
+
+.Picker-calendar table td.is-current-month {
+  color: #D6D6D7;
 }

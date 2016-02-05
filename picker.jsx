@@ -1,5 +1,4 @@
-/* global React, ReactDOM */
-(function () {
+(function (React, ReactDOM, moment) {
   const TopBar = React.createClass({
     displayName: 'TopBar',
 
@@ -31,29 +30,84 @@
     displayName: 'MonthView',
 
     getInitialState () {
+      let { year, month } = this.props;
       return {
-        topLabel: 'September 2015'
+        date: moment({ year, month })
       };
     },
 
     nextRange () {
-
+      let { date } = this.state;
+      this.setState({
+        date: moment(date).add(1, 'months')
+      });
     },
 
     prevRange () {
+      let { date } = this.state;
+      this.setState({
+        date: moment(date).subtract(1, 'months')
+      });
+    },
 
+    tableHeader: (
+      <thead>
+        <tr>{moment.weekdaysShort().map(day => <th key={day}>{day}</th>)}</tr>
+      </thead>
+    ),
+
+    generateWeekItems (date, currentMonth) {
+      let items = [];
+
+      let startOfWeek = moment(date).startOf('week');
+
+      for (let i = 0; i < 7; i += 1) {
+        let day = moment(startOfWeek).add(i, 'days');
+
+        let classes = [];
+        if (day.month() === currentMonth) {
+          classes.push('is-current-month');
+        }
+
+        items.push(
+          <td key={day.date()}
+              className={classes.join(' ')}
+              onClick={this.props.onDatePicked.bind(null, day)} >
+            {day.date()}
+          </td>
+        );
+      }
+
+      return items;
+    },
+
+    generateTable (date) {
+      let rows = [];
+
+      let week = moment(date);
+      for (let i = 0; i < 6; i += 1) {
+        rows.push(<tr key={week.week()}>{this.generateWeekItems(week, date.month())}</tr>);
+        week.add(1, 'weeks');
+      }
+
+      return (
+        <table>
+          {this.tableHeader}
+          <tbody>{rows}</tbody>
+        </table>
+      );
     },
 
     render () {
-      let { topLabel } = this.state;
+      let { date } = this.state;
 
       return (
         <div className="Picker-calendar Picker-month">
-          <TopBar label={topLabel}
+          <TopBar label={date.format('MMMM YYYY')}
                   onClickLeft={this.prevRange}
                   onClickCenter={this.props.onClickTopLabel}
                   onClickRight={this.nextRange} />
-          some month data
+          {this.generateTable(date)}
         </div>
       );
     }
@@ -142,12 +196,21 @@
       this.setState({ viewType });
     },
 
+    onDatePicked (date) {
+      console.error('new date picked', date.toString());
+    },
+
     render () {
       let { viewType } = this.state;
 
       let view;
       if (viewType === ViewType.MONTH) {
-        view = <MonthView onClickTopLabel={this.nextView.bind(this, ViewType.YEAR)} />;
+        view = (
+          <MonthView year={2015}
+                     month={8}
+                     onClickTopLabel={this.nextView.bind(this, ViewType.YEAR)}
+                     onDatePicked={this.onDatePicked} />
+        );
       } else if (viewType === ViewType.YEAR) {
         view = <YearView onClickTopLabel={this.nextView.bind(this, ViewType.YEAR_RANGE)} />;
       } else { // ViewType.YEAR_RANGE
@@ -210,4 +273,4 @@
       return picker;
     }
   };
-})();
+})(window.React, window.ReactDOM, window.moment);

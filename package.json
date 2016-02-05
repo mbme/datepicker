@@ -5,7 +5,8 @@
   "main": "./picker.js",
   "dependencies": {
     "react": "*",
-    "react-dom": "*"
+    "react-dom": "*",
+    "moment": "*"
   },
   "devDependencies": {
     "babel-cli": "*",
