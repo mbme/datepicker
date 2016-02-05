@@ -1,4 +1,22 @@
 (function (React, ReactDOM, moment) {
+  const Utils = {
+
+    /**
+     * Get absolute position of top left corner of the element.
+     * @param {DOMElement} element
+     * @returns {{x, y}} element coordinates
+     */
+    getElementPos (element) {
+      return {
+        x: element.offsetLeft - element.scrollLeft + element.clientLeft,
+        y: element.offsetTop - element.scrollTop + element.clientTop
+      };
+    }
+  };
+
+  /**
+   * Top bar of the datepicker with left/right arrows and label in the middle.
+   */
   const TopBar = React.createClass({
     displayName: 'TopBar',
 
@@ -26,6 +44,9 @@
     }
   });
 
+  /**
+   * Bottom bar of the datepicker with "Today" button.
+   */
   const BottomBar = React.createClass({
     displayName: 'BottomBar',
 
@@ -38,6 +59,10 @@
     }
   });
 
+  /**
+   * One of possible datepicker states.
+   * Allows to select day in a month and switch months back and forth.
+   */
   const MonthView = React.createClass({
     displayName: 'MonthView',
 
@@ -154,6 +179,10 @@
     }
   });
 
+  /**
+   * One of possible datepicker states.
+   * Allows to select month in a year and switch years back and forth.
+   */
   const YearView = React.createClass({
     displayName: 'YearView',
 
@@ -251,7 +280,15 @@
     }
   });
 
+  /**
+   * Number of visible years for YearRangeView.
+   */
   const YEARS_RANGE = 16;
+
+  /**
+   * One of possible datepicker states.
+   * Allows to select year from years range.
+   */
   const YearRangeView = React.createClass({
     displayName: 'YearRangeView',
 
@@ -352,12 +389,19 @@
     }
   });
 
+  /**
+   * Available datepicker states.
+   */
   const ViewType = {
     MONTH: 'month',
     YEAR: 'year',
     YEAR_RANGE: 'year-range'
   };
 
+  /**
+   * Datepicker component.
+   * Can be in one of ViewType states and switches them if required.
+   */
   const Picker = React.createClass({
     displayName: 'Picker',
 
@@ -427,14 +471,14 @@
     }
   });
 
-  function getElementPos (element) {
-    return {
-      x: element.offsetLeft - element.scrollLeft + element.clientLeft,
-      y: element.offsetTop - element.scrollTop + element.clientTop
-    };
-  }
-
+  /**
+   * Manages wrapper element with absolute positioning and renders Picker component inside it.
+   */
   class Datepicker {
+    /**
+     * @param {DOMElement} el text input field for datepicker
+     * @param {Function} onDateSelected callback to execute when user select date
+     */
     constructor (el, onDateSelected) {
       this.el = el;
       this.isVisible = false;
@@ -449,6 +493,9 @@
       );
     }
 
+    /**
+     * Show datepicker under text input.
+     */
     show () {
       if (this.isVisible) {
         return;
@@ -459,18 +506,27 @@
       this.wrapper.classList.add('is-visible');
     }
 
+    /**
+     * Hide datepicker.
+     */
     hide () {
       this.wrapper.classList.remove('is-visible');
       this.isVisible = false;
     }
 
+    /**
+     * Update datepicker position to be directly under text input.
+     */
     updatePosition () {
-      let { x, y } = getElementPos(this.el);
+      let { x, y } = Utils.getElementPos(this.el);
       let elHeight = this.el.offsetHeight;
       this.wrapper.style.top = `${y + elHeight}px`;
       this.wrapper.style.left = `${x}px`;
     }
 
+    /**
+     * Close and remove datepicker.
+     */
     close () {
       ReactDOM.unmountComponentAtNode(this.wrapper);
       this.wrapper.parentNode.removeChild(this.wrapper);
@@ -480,6 +536,11 @@
   window.Picker = {
     Datepicker,
 
+    /**
+     * Create Datepicker for text input and show it on focus.
+     * @param {DOMElement} el text input
+     * @returns {Datepicker}
+     */
     install (el) {
       let picker = new Datepicker(el, function (date) {
         el.value = date.format('MMMM D YYYY'); // eslint-disable-line no-param-reassign
