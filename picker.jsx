@@ -89,8 +89,12 @@
     },
 
     showToday () {
+      let now = moment();
       this.setState({
-        range: moment()
+        range: moment({
+          year: now.year(),
+          month: now.month()
+        })
       });
     },
 
@@ -223,6 +227,10 @@
           month: i,
           date: selectedDate.date()
         });
+        // ensure that we're not overflowing max date in month
+        if (!day.isValid()) {
+          day = moment({ year, month: i }).endOf('month');
+        }
 
         let classes = [];
 
@@ -329,6 +337,14 @@
           month: selectedDate.month(),
           date: selectedDate.date()
         });
+
+        // ensure that we're not overflowing max date in month
+        if (!day.isValid()) {
+          day = moment({
+            year: rangeStart + i,
+            month: selectedDate.month()
+          }).endOf('month');
+        }
 
         let classes = [];
 

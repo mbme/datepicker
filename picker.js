@@ -5,6 +5,25 @@ var _createClass = function () { function defineProperties(target, props) { for 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
 (function (React, ReactDOM, moment) {
+  var Utils = {
+
+    /**
+     * Get absolute position of top left corner of the element.
+     * @param {DOMElement} element
+     * @returns {{x, y}} element coordinates
+     */
+
+    getElementPos: function getElementPos(element) {
+      return {
+        x: element.offsetLeft - element.scrollLeft + element.clientLeft,
+        y: element.offsetTop - element.scrollTop + element.clientTop
+      };
+    }
+  };
+
+  /**
+   * Top bar of the datepicker with left/right arrows and label in the middle.
+   */
   var TopBar = React.createClass({
     displayName: 'TopBar',
 
@@ -37,6 +56,9 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
     }
   });
 
+  /**
+   * Bottom bar of the datepicker with "Today" button.
+   */
   var BottomBar = React.createClass({
     displayName: 'BottomBar',
 
@@ -49,6 +71,10 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
     }
   });
 
+  /**
+   * One of possible datepicker states.
+   * Allows to select day in a month and switch months back and forth.
+   */
   var MonthView = React.createClass({
     displayName: 'MonthView',
 
@@ -73,8 +99,12 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
       });
     },
     showToday: function showToday() {
+      var now = moment();
       this.setState({
-        range: moment()
+        range: moment({
+          year: now.year(),
+          month: now.month()
+        })
       });
     },
     generateWeekItems: function generateWeekItems(date, currentMonth) {
@@ -175,6 +205,10 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
     }
   });
 
+  /**
+   * One of possible datepicker states.
+   * Allows to select month in a year and switch years back and forth.
+   */
   var YearView = React.createClass({
     displayName: 'YearView',
 
@@ -213,6 +247,10 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
           month: i,
           date: selectedDate.date()
         });
+        // ensure that we're not overflowing max date in month
+        if (!day.isValid()) {
+          day = moment({ year: year, month: i }).endOf('month');
+        }
 
         var classes = [];
 
@@ -273,7 +311,15 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
     }
   });
 
+  /**
+   * Number of visible years for YearRangeView.
+   */
   var YEARS_RANGE = 16;
+
+  /**
+   * One of possible datepicker states.
+   * Allows to select year from years range.
+   */
   var YearRangeView = React.createClass({
     displayName: 'YearRangeView',
 
@@ -312,6 +358,14 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
           month: selectedDate.month(),
           date: selectedDate.date()
         });
+
+        // ensure that we're not overflowing max date in month
+        if (!day.isValid()) {
+          day = moment({
+            year: rangeStart + i,
+            month: selectedDate.month()
+          }).endOf('month');
+        }
 
         var classes = [];
 
@@ -375,12 +429,19 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
     }
   });
 
+  /**
+   * Available datepicker states.
+   */
   var ViewType = {
     MONTH: 'month',
     YEAR: 'year',
     YEAR_RANGE: 'year-range'
   };
 
+  /**
+   * Datepicker component.
+   * Can be in one of ViewType states and switches them if required.
+   */
   var Picker = React.createClass({
     displayName: 'Picker',
 
@@ -439,14 +500,16 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
     }
   });
 
-  function getElementPos(element) {
-    return {
-      x: element.offsetLeft - element.scrollLeft + element.clientLeft,
-      y: element.offsetTop - element.scrollTop + element.clientTop
-    };
-  }
+  /**
+   * Manages wrapper element with absolute positioning and renders Picker component inside it.
+   */
 
   var Datepicker = function () {
+    /**
+     * @param {DOMElement} el text input field for datepicker
+     * @param {Function} onDateSelected callback to execute when user select date
+     */
+
     function Datepicker(el, onDateSelected) {
       _classCallCheck(this, Datepicker);
 
@@ -460,6 +523,10 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
       ReactDOM.render(React.createElement(Picker, { onDateSelected: onDateSelected }), this.wrapper);
     }
 
+    /**
+     * Show datepicker under text input.
+     */
+
     _createClass(Datepicker, [{
       key: "show",
       value: function show() {
@@ -471,24 +538,39 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 
         this.wrapper.classList.add('is-visible');
       }
+
+      /**
+       * Hide datepicker.
+       */
+
     }, {
       key: "hide",
       value: function hide() {
         this.wrapper.classList.remove('is-visible');
         this.isVisible = false;
       }
+
+      /**
+       * Update datepicker position to be directly under text input.
+       */
+
     }, {
       key: "updatePosition",
       value: function updatePosition() {
-        var _getElementPos = getElementPos(this.el);
+        var _Utils$getElementPos = Utils.getElementPos(this.el);
 
-        var x = _getElementPos.x;
-        var y = _getElementPos.y;
+        var x = _Utils$getElementPos.x;
+        var y = _Utils$getElementPos.y;
 
         var elHeight = this.el.offsetHeight;
         this.wrapper.style.top = y + elHeight + "px";
         this.wrapper.style.left = x + "px";
       }
+
+      /**
+       * Close and remove datepicker.
+       */
+
     }, {
       key: "close",
       value: function close() {
@@ -503,6 +585,11 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
   window.Picker = {
     Datepicker: Datepicker,
 
+    /**
+     * Create Datepicker for text input and show it on focus.
+     * @param {DOMElement} el text input
+     * @returns {Datepicker}
+     */
     install: function install(el) {
       var picker = new Datepicker(el, function (date) {
         el.value = date.format('MMMM D YYYY'); // eslint-disable-line no-param-reassign
