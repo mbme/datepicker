@@ -1,4 +1,9 @@
 (function (React, ReactDOM, moment) {
+  const PropTypes = React.PropTypes;
+
+  /**
+   * Various helpers.
+   */
   const Utils = {
 
     /**
@@ -11,7 +16,25 @@
         x: element.offsetLeft - element.scrollLeft + element.clientLeft,
         y: element.offsetTop - element.scrollTop + element.clientTop
       };
+    },
+
+    /**
+     * Get list of values of object properties.
+     * @param {object} object object to use
+     * @returns {Array} list of values
+     */
+    objectValues (object = {}) {
+      return Object.keys(object).map(key => object[key]);
     }
+  };
+
+  /**
+   * Available datepicker states.
+   */
+  const ViewType = {
+    MONTH:      'month',
+    YEAR:       'year',
+    YEAR_RANGE: 'year-range'
   };
 
   /**
@@ -19,6 +42,13 @@
    */
   const TopBar = React.createClass({
     displayName: 'TopBar',
+
+    propTypes: {
+      label:         PropTypes.string,
+      onClickLeft:   PropTypes.func,
+      onClickRight:  PropTypes.func,
+      onClickCenter: PropTypes.func
+    },
 
     render () {
       let {
@@ -50,6 +80,10 @@
   const BottomBar = React.createClass({
     displayName: 'BottomBar',
 
+    propTypes: {
+      onClick: PropTypes.func
+    },
+
     render () {
       return (
         <div className="Picker-bottom" onClick={this.props.onClick}>
@@ -65,6 +99,14 @@
    */
   const MonthView = React.createClass({
     displayName: 'MonthView',
+
+    propTypes: {
+      selectedDate:    PropTypes.instanceOf(moment),
+      year:            PropTypes.number.isRequired,
+      month:           PropTypes.number.isRequired,
+      onClickTopLabel: PropTypes.func,
+      onSelected:      PropTypes.func.isRequired
+    },
 
     getInitialState () {
       let { year, month } = this.props;
@@ -125,7 +167,7 @@
 
         // highlight selected day
         // check year, month and day
-        if (day.isSame(selectedDate, 'day')) {
+        if (selectedDate && day.isSame(selectedDate, 'day')) {
           classes.push('is-selected');
         }
 
@@ -199,6 +241,13 @@
   const YearView = React.createClass({
     displayName: 'YearView',
 
+    propTypes: {
+      selectedDate:    PropTypes.instanceOf(moment),
+      year:            PropTypes.number.isRequired,
+      onClickTopLabel: PropTypes.func,
+      onSelected:      PropTypes.func.isRequired
+    },
+
     getInitialState () {
       let { year } = this.props;
 
@@ -245,7 +294,7 @@
 
         // highlight selected month
         // check year and month
-        if (day.isSame(selectedDate, 'month')) {
+        if (selectedDate && day.isSame(selectedDate, 'month')) {
           classes.push('is-selected');
         }
 
@@ -287,7 +336,7 @@
     render () {
       return (
         <div className="Picker Picker-year">
-          <TopBar label={this.state.year}
+          <TopBar label={this.state.year.toString()}
                   onClickLeft={this.prevRange}
                   onClickCenter={this.props.onClickTopLabel}
                   onClickRight={this.nextRange} />
@@ -309,6 +358,13 @@
    */
   const YearRangeView = React.createClass({
     displayName: 'YearRangeView',
+
+    propTypes: {
+      selectedDate:    PropTypes.instanceOf(moment),
+      year:            PropTypes.number.isRequired,
+      onClickTopLabel: PropTypes.func,
+      onSelected:      PropTypes.func.isRequired
+    },
 
     getInitialState () {
       let { year } = this.props;
@@ -411,20 +467,17 @@
   });
 
   /**
-   * Available datepicker states.
-   */
-  const ViewType = {
-    MONTH: 'month',
-    YEAR: 'year',
-    YEAR_RANGE: 'year-range'
-  };
-
-  /**
    * Datepicker component.
    * Can be in one of ViewType states and switches them if required.
    */
   const Picker = React.createClass({
     displayName: 'Picker',
+
+    propTypes: {
+      selectedDate:   PropTypes.instanceOf(moment),
+      view:           PropTypes.oneOf(Utils.objectValues(ViewType)),
+      onDateSelected: PropTypes.func.isRequired
+    },
 
     getInitialState () {
       let { selectedDate, view = ViewType.MONTH } = this.props;

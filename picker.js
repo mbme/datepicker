@@ -1,10 +1,15 @@
-"use strict";
+'use strict';
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
 (function (React, ReactDOM, moment) {
+  var PropTypes = React.PropTypes;
+
+  /**
+   * Various helpers.
+   */
   var Utils = {
 
     /**
@@ -18,7 +23,29 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
         x: element.offsetLeft - element.scrollLeft + element.clientLeft,
         y: element.offsetTop - element.scrollTop + element.clientTop
       };
+    },
+
+    /**
+     * Get list of values of object properties.
+     * @param {object} object object to use
+     * @returns {Array} list of values
+     */
+    objectValues: function objectValues() {
+      var object = arguments.length <= 0 || arguments[0] === undefined ? {} : arguments[0];
+
+      return Object.keys(object).map(function (key) {
+        return object[key];
+      });
     }
+  };
+
+  /**
+   * Available datepicker states.
+   */
+  var ViewType = {
+    MONTH: 'month',
+    YEAR: 'year',
+    YEAR_RANGE: 'year-range'
   };
 
   /**
@@ -26,6 +53,13 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
    */
   var TopBar = React.createClass({
     displayName: 'TopBar',
+
+    propTypes: {
+      label: PropTypes.string,
+      onClickLeft: PropTypes.func,
+      onClickRight: PropTypes.func,
+      onClickCenter: PropTypes.func
+    },
 
     render: function render() {
       var _props = this.props;
@@ -35,22 +69,22 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
       var onClickCenter = _props.onClickCenter;
 
       return React.createElement(
-        "div",
-        { className: "Picker-top" },
+        'div',
+        { className: 'Picker-top' },
         React.createElement(
-          "div",
-          { className: "Picker-top-left", onClick: onClickLeft },
-          "<"
+          'div',
+          { className: 'Picker-top-left', onClick: onClickLeft },
+          '<'
         ),
         React.createElement(
-          "div",
-          { className: "Picker-top-center", onClick: onClickCenter },
+          'div',
+          { className: 'Picker-top-center', onClick: onClickCenter },
           label
         ),
         React.createElement(
-          "div",
-          { className: "Picker-top-right", onClick: onClickRight },
-          ">"
+          'div',
+          { className: 'Picker-top-right', onClick: onClickRight },
+          '>'
         )
       );
     }
@@ -62,11 +96,15 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
   var BottomBar = React.createClass({
     displayName: 'BottomBar',
 
+    propTypes: {
+      onClick: PropTypes.func
+    },
+
     render: function render() {
       return React.createElement(
-        "div",
-        { className: "Picker-bottom", onClick: this.props.onClick },
-        "Today"
+        'div',
+        { className: 'Picker-bottom', onClick: this.props.onClick },
+        'Today'
       );
     }
   });
@@ -77,6 +115,14 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
    */
   var MonthView = React.createClass({
     displayName: 'MonthView',
+
+    propTypes: {
+      selectedDate: PropTypes.instanceOf(moment),
+      year: PropTypes.number.isRequired,
+      month: PropTypes.number.isRequired,
+      onClickTopLabel: PropTypes.func,
+      onSelected: PropTypes.func.isRequired
+    },
 
     getInitialState: function getInitialState() {
       var _props2 = this.props;
@@ -138,7 +184,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 
         // highlight selected day
         // check year, month and day
-        if (day.isSame(selectedDate, 'day')) {
+        if (selectedDate && day.isSame(selectedDate, 'day')) {
           classes.push('is-selected');
         }
 
@@ -154,11 +200,11 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
           dayStr = '&nbsp;' + dayStr;
         }
 
-        items.push(React.createElement("td", { key: day.date(),
+        items.push(React.createElement('td', { key: day.date(),
           className: classes.join(' '),
-          "data-year": day.year(),
-          "data-month": day.month(),
-          "data-date": day.date(),
+          'data-year': day.year(),
+          'data-month': day.month(),
+          'data-date': day.date(),
           dangerouslySetInnerHTML: { __html: dayStr } }));
       }
 
@@ -170,7 +216,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
       var week = moment(range);
       for (var i = 0; i < 6; i += 1) {
         rows.push(React.createElement(
-          "tr",
+          'tr',
           { key: week.week() },
           this.generateWeekItems(week, range.month())
         ));
@@ -178,17 +224,17 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
       }
 
       return React.createElement(
-        "table",
+        'table',
         { onClick: this.onClick },
         React.createElement(
-          "thead",
+          'thead',
           null,
           React.createElement(
-            "tr",
+            'tr',
             null,
             moment.weekdaysShort().map(function (day) {
               return React.createElement(
-                "th",
+                'th',
                 { key: day },
                 day
               );
@@ -196,7 +242,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
           )
         ),
         React.createElement(
-          "tbody",
+          'tbody',
           null,
           rows
         )
@@ -206,8 +252,8 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
       var range = this.state.range;
 
       return React.createElement(
-        "div",
-        { className: "Picker Picker-month" },
+        'div',
+        { className: 'Picker Picker-month' },
         React.createElement(TopBar, { label: range.format('MMMM YYYY'),
           onClickLeft: this.prevRange,
           onClickCenter: this.props.onClickTopLabel,
@@ -224,6 +270,13 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
    */
   var YearView = React.createClass({
     displayName: 'YearView',
+
+    propTypes: {
+      selectedDate: PropTypes.instanceOf(moment),
+      year: PropTypes.number.isRequired,
+      onClickTopLabel: PropTypes.func,
+      onSelected: PropTypes.func.isRequired
+    },
 
     getInitialState: function getInitialState() {
       var year = this.props.year;
@@ -268,7 +321,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 
         // highlight selected month
         // check year and month
-        if (day.isSame(selectedDate, 'month')) {
+        if (selectedDate && day.isSame(selectedDate, 'month')) {
           classes.push('is-selected');
         }
 
@@ -280,10 +333,10 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 
         var label = day.format('MMM');
         cells.push(React.createElement(
-          "td",
+          'td',
           { key: label,
-            "data-year": year,
-            "data-month": month,
+            'data-year': year,
+            'data-month': month,
             className: classes.join(' ') },
           label
         ));
@@ -292,7 +345,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
       var rows = [];
       for (var i = 0; i < 12; i += 3) {
         rows.push(React.createElement(
-          "tr",
+          'tr',
           { key: i },
           cells[i],
           cells[i + 1],
@@ -301,10 +354,10 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
       }
 
       return React.createElement(
-        "table",
+        'table',
         { onClick: this.onClick },
         React.createElement(
-          "tbody",
+          'tbody',
           null,
           rows
         )
@@ -312,9 +365,9 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
     },
     render: function render() {
       return React.createElement(
-        "div",
-        { className: "Picker Picker-year" },
-        React.createElement(TopBar, { label: this.state.year,
+        'div',
+        { className: 'Picker Picker-year' },
+        React.createElement(TopBar, { label: this.state.year.toString(),
           onClickLeft: this.prevRange,
           onClickCenter: this.props.onClickTopLabel,
           onClickRight: this.nextRange }),
@@ -335,6 +388,13 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
    */
   var YearRangeView = React.createClass({
     displayName: 'YearRangeView',
+
+    propTypes: {
+      selectedDate: PropTypes.instanceOf(moment),
+      year: PropTypes.number.isRequired,
+      onClickTopLabel: PropTypes.func,
+      onSelected: PropTypes.func.isRequired
+    },
 
     getInitialState: function getInitialState() {
       var year = this.props.year;
@@ -389,9 +449,9 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
         }
 
         cells.push(React.createElement(
-          "td",
+          'td',
           { key: year,
-            "data-year": year,
+            'data-year': year,
             className: classes.join(' ') },
           year
         ));
@@ -400,7 +460,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
       var rows = [];
       for (var i = 0; i < YEARS_RANGE; i += 4) {
         rows.push(React.createElement(
-          "tr",
+          'tr',
           { key: i },
           cells[i],
           cells[i + 1],
@@ -410,10 +470,10 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
       }
 
       return React.createElement(
-        "table",
+        'table',
         { onClick: this.onClick },
         React.createElement(
-          "tbody",
+          'tbody',
           null,
           rows
         )
@@ -422,10 +482,10 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
     render: function render() {
       var rangeStart = this.state.rangeStart;
 
-      var topLabel = rangeStart + " - " + (rangeStart + YEARS_RANGE - 1);
+      var topLabel = rangeStart + ' - ' + (rangeStart + YEARS_RANGE - 1);
       return React.createElement(
-        "div",
-        { className: "Picker Picker-yearrange" },
+        'div',
+        { className: 'Picker Picker-yearrange' },
         React.createElement(TopBar, { label: topLabel,
           onClickLeft: this.prevRange,
           onClickCenter: this.props.onClickTopLabel,
@@ -437,20 +497,17 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
   });
 
   /**
-   * Available datepicker states.
-   */
-  var ViewType = {
-    MONTH: 'month',
-    YEAR: 'year',
-    YEAR_RANGE: 'year-range'
-  };
-
-  /**
    * Datepicker component.
    * Can be in one of ViewType states and switches them if required.
    */
   var Picker = React.createClass({
     displayName: 'Picker',
+
+    propTypes: {
+      selectedDate: PropTypes.instanceOf(moment),
+      view: PropTypes.oneOf(Utils.objectValues(ViewType)),
+      onDateSelected: PropTypes.func.isRequired
+    },
 
     getInitialState: function getInitialState() {
       var _props3 = this.props;
@@ -566,7 +623,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
      */
 
     _createClass(Datepicker, [{
-      key: "show",
+      key: 'show',
       value: function show(selectedDate) {
         if (this.isVisible) {
           return;
@@ -587,7 +644,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
        */
 
     }, {
-      key: "hide",
+      key: 'hide',
       value: function hide() {
         this.wrapper.classList.remove('is-visible');
         this.isVisible = false;
@@ -598,7 +655,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
        */
 
     }, {
-      key: "updatePosition",
+      key: 'updatePosition',
       value: function updatePosition() {
         var _Utils$getElementPos = Utils.getElementPos(this.el);
 
@@ -606,8 +663,8 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
         var y = _Utils$getElementPos.y;
 
         var elHeight = this.el.offsetHeight;
-        this.wrapper.style.top = y + elHeight + "px";
-        this.wrapper.style.left = x + "px";
+        this.wrapper.style.top = y + elHeight + 'px';
+        this.wrapper.style.left = x + 'px';
       }
 
       /**
@@ -615,7 +672,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
        */
 
     }, {
-      key: "close",
+      key: 'close',
       value: function close() {
         ReactDOM.unmountComponentAtNode(this.wrapper);
         this.wrapper.parentNode.removeChild(this.wrapper);
