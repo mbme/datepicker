@@ -67,12 +67,17 @@
     displayName: 'MonthView',
 
     getInitialState () {
-      let { selectedDate } = this.props;
+      let { year, month } = this.props;
 
-      let range = selectedDate ? moment(selectedDate) : moment();
-      range.startOf('month');
+      return {
+        range: moment({ year, month })
+      };
+    },
 
-      return { range };
+    componentWillReceiveProps ({ year, month }) {
+      this.setState({
+        range: moment({ year, month })
+      });
     },
 
     nextRange () {
@@ -95,9 +100,9 @@
 
     onClick ({ target }) {
       if (target.nodeName === 'TD') {
-        let year = target.getAttribute('data-year');
-        let month = target.getAttribute('data-month');
-        let date = target.getAttribute('data-date');
+        let year = +target.getAttribute('data-year');
+        let month = +target.getAttribute('data-month');
+        let date = +target.getAttribute('data-date');
         this.props.onSelected(year, month, date);
       }
     },
@@ -163,9 +168,7 @@
         <table onClick={this.onClick}>
           <thead>
             <tr>
-              {moment.weekdaysShort().map(
-                 day => <th key={day}>{day}</th>
-               )}
+              {moment.weekdaysShort().map(day => <th key={day}>{day}</th>)}
             </tr>
           </thead>
           <tbody>{rows}</tbody>
@@ -197,8 +200,7 @@
     displayName: 'YearView',
 
     getInitialState () {
-      let { selectedDate } = this.props;
-      let year = selectedDate ? selectedDate.year() : moment().year();
+      let { year } = this.props;
 
       return { year };
     },
@@ -223,8 +225,8 @@
 
     onClick ({ target }) {
       if (target.nodeName === 'TD') {
-        let year = target.getAttribute('data-year');
-        let month = target.getAttribute('data-month');
+        let year = +target.getAttribute('data-year');
+        let month = +target.getAttribute('data-month');
         this.props.onSelected(year, month);
       }
     },
@@ -309,8 +311,8 @@
     displayName: 'YearRangeView',
 
     getInitialState () {
-      let { selectedDate } = this.props;
-      let year = selectedDate ? selectedDate.year() : moment().year();
+      let { year } = this.props;
+
       return {
         rangeStart: year - 8
       };
@@ -336,7 +338,8 @@
 
     onClick ({ target }) {
       if (target.nodeName === 'TD') {
-        this.props.onSelected(target.getAttribute('data-year'));
+        let year = +target.getAttribute('data-year');
+        this.props.onSelected(year);
       }
     },
 
@@ -424,83 +427,89 @@
     displayName: 'Picker',
 
     getInitialState () {
+      let { selectedDate, view = ViewType.MONTH } = this.props;
+      let now = moment();
       return {
-        viewType: ViewType.MONTH,
-        selectedDate: null
+        view,
+        selectedDate,
+        year: now.year(),
+        month: now.month()
       };
     },
 
-    nextView (viewType) {
-      this.setState({ viewType });
+    componentWillReceiveProps ({ selectedDate, view = this.state.view }) {
+      let { year, month } = this.state;
+
+      if (selectedDate) {
+        year = selectedDate.year();
+        month = selectedDate.month();
+      }
+
+      this.setState({
+        view,
+        selectedDate,
+        year,
+        month
+      });
     },
 
     goToYearView () {
-      this.nextView(ViewType.YEAR);
+      this.setState({ view: ViewType.YEAR });
     },
 
     goToYearRangeView () {
-      this.nextView(ViewType.YEAR_RANGE);
+      this.setState({ view: ViewType.YEAR_RANGE });
     },
 
     goToMonthView () {
-      this.nextView(ViewType.MONTH);
+      this.setState({ view: ViewType.MONTH });
     },
 
     onDateSelected (year, month, date) {
       let selectedDate = moment({ year, month, date });
-      if (!selectedDate.isValid()) {
-        selectedDate = moment({ year, month }).endOf('month');
-      }
-
-      this.setState({ selectedDate });
+      this.setState({ selectedDate, year, month });
       this.props.onDateSelected(selectedDate);
     },
 
     onYearAndMonthSelected (year, month) {
-      let selectedDate = this.state.selectedDate;
-      if (selectedDate) {
-        this.onDateSelected(year, month, selectedDate.date());
-      } else {
-        this.onDateSelected(year, month, 1);
-      }
-      this.goToYearView();
+      this.setState({ year, month });
+      this.goToMonthView();
     },
 
     onYearSelected (year) {
-      let selectedDate = this.state.selectedDate;
-      if (selectedDate) {
-        this.onDateSelected(year, selectedDate.month(), selectedDate.date());
-      } else {
-        this.onDateSelected(year, 0, 1);
-      }
+      this.setState({ year });
       this.goToYearView();
     },
 
     render () {
-      let { viewType, selectedDate } = this.state;
+      let { view, selectedDate, year, month } = this.state;
 
-      let view;
-      if (viewType === ViewType.MONTH) {
-        view = (
+      if (view === ViewType.MONTH) {
+        return (
           <MonthView selectedDate={selectedDate}
+                     year={year}
+                     month={month}
                      onClickTopLabel={this.goToYearView}
                      onSelected={this.onDateSelected} />
         );
-      } else if (viewType === ViewType.YEAR) {
-        view = (
+      }
+
+      if (view === ViewType.YEAR) {
+        return (
           <YearView selectedDate={selectedDate}
+                    year={year}
                     onClickTopLabel={this.goToYearRangeView}
                     onSelected={this.onYearAndMonthSelected} />
         );
-      } else { // ViewType.YEAR_RANGE
-        view = (
-          <YearRangeView selectedDate={selectedDate}
-                         onClickTopLabel={this.goToMonthView}
-                         onSelected={this.onYearSelected} />
-        );
       }
 
-      return view;
+      // ViewType.YEAR_RANGE
+      return (
+        <YearRangeView selectedDate={selectedDate}
+                       year={year}
+                       onClickTopLabel={this.goToMonthView}
+                       onSelected={this.onYearSelected} />
+      );
     }
   });
 
@@ -532,7 +541,9 @@
       }
 
       ReactDOM.render(
-        <Picker selectedDate={selectedDate} onDateSelected={this.onDateSelected}/>,
+        <Picker selectedDate={selectedDate}
+                view={ViewType.MONTH}
+                onDateSelected={this.onDateSelected} />,
         this.wrapper
       );
 
@@ -583,7 +594,7 @@
       });
 
       // prevent manual editing
-      el.addEventListener('keypress', function (evt) {
+      el.addEventListener('keydown', function (evt) {
         evt.stopPropagation();
         evt.preventDefault();
       });
@@ -599,7 +610,7 @@
       // show picker when input is focused
       el.addEventListener('click', function (evt) {
         let date = moment(el.value, format);
-        picker.show(date);
+        picker.show(date.isValid() ? date : undefined);
         window.addEventListener('click', clickHandler, true);
 
         // stop propagation to not to trigger clickHandler

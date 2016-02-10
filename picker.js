@@ -79,12 +79,21 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
     displayName: 'MonthView',
 
     getInitialState: function getInitialState() {
-      var selectedDate = this.props.selectedDate;
+      var _props2 = this.props;
+      var year = _props2.year;
+      var month = _props2.month;
 
-      var range = selectedDate ? moment(selectedDate) : moment();
-      range.startOf('month');
+      return {
+        range: moment({ year: year, month: month })
+      };
+    },
+    componentWillReceiveProps: function componentWillReceiveProps(_ref) {
+      var year = _ref.year;
+      var month = _ref.month;
 
-      return { range: range };
+      this.setState({
+        range: moment({ year: year, month: month })
+      });
     },
     nextRange: function nextRange() {
       this.setState({
@@ -101,13 +110,13 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
         range: moment().startOf('month')
       });
     },
-    onClick: function onClick(_ref) {
-      var target = _ref.target;
+    onClick: function onClick(_ref2) {
+      var target = _ref2.target;
 
       if (target.nodeName === 'TD') {
-        var year = target.getAttribute('data-year');
-        var month = target.getAttribute('data-month');
-        var date = target.getAttribute('data-date');
+        var year = +target.getAttribute('data-year');
+        var month = +target.getAttribute('data-month');
+        var date = +target.getAttribute('data-date');
         this.props.onSelected(year, month, date);
       }
     },
@@ -217,9 +226,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
     displayName: 'YearView',
 
     getInitialState: function getInitialState() {
-      var selectedDate = this.props.selectedDate;
-
-      var year = selectedDate ? selectedDate.year() : moment().year();
+      var year = this.props.year;
 
       return { year: year };
     },
@@ -238,12 +245,12 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
         year: moment().year()
       });
     },
-    onClick: function onClick(_ref2) {
-      var target = _ref2.target;
+    onClick: function onClick(_ref3) {
+      var target = _ref3.target;
 
       if (target.nodeName === 'TD') {
-        var year = target.getAttribute('data-year');
-        var month = target.getAttribute('data-month');
+        var year = +target.getAttribute('data-year');
+        var month = +target.getAttribute('data-month');
         this.props.onSelected(year, month);
       }
     },
@@ -330,9 +337,8 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
     displayName: 'YearRangeView',
 
     getInitialState: function getInitialState() {
-      var selectedDate = this.props.selectedDate;
+      var year = this.props.year;
 
-      var year = selectedDate ? selectedDate.year() : moment().year();
       return {
         rangeStart: year - 8
       };
@@ -352,11 +358,12 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
         rangeStart: moment().year() - 8
       });
     },
-    onClick: function onClick(_ref3) {
-      var target = _ref3.target;
+    onClick: function onClick(_ref4) {
+      var target = _ref4.target;
 
       if (target.nodeName === 'TD') {
-        this.props.onSelected(target.getAttribute('data-year'));
+        var year = +target.getAttribute('data-year');
+        this.props.onSelected(year);
       }
     },
     generateTable: function generateTable() {
@@ -446,72 +453,88 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
     displayName: 'Picker',
 
     getInitialState: function getInitialState() {
+      var _props3 = this.props;
+      var selectedDate = _props3.selectedDate;
+      var _props3$view = _props3.view;
+      var view = _props3$view === undefined ? ViewType.MONTH : _props3$view;
+
+      var now = moment();
       return {
-        viewType: ViewType.MONTH,
-        selectedDate: null
+        view: view,
+        selectedDate: selectedDate,
+        year: now.year(),
+        month: now.month()
       };
     },
-    nextView: function nextView(viewType) {
-      this.setState({ viewType: viewType });
+    componentWillReceiveProps: function componentWillReceiveProps(_ref5) {
+      var selectedDate = _ref5.selectedDate;
+      var _ref5$view = _ref5.view;
+      var view = _ref5$view === undefined ? this.state.view : _ref5$view;
+      var _state = this.state;
+      var year = _state.year;
+      var month = _state.month;
+
+      if (selectedDate) {
+        year = selectedDate.year();
+        month = selectedDate.month();
+      }
+
+      this.setState({
+        view: view,
+        selectedDate: selectedDate,
+        year: year,
+        month: month
+      });
     },
     goToYearView: function goToYearView() {
-      this.nextView(ViewType.YEAR);
+      this.setState({ view: ViewType.YEAR });
     },
     goToYearRangeView: function goToYearRangeView() {
-      this.nextView(ViewType.YEAR_RANGE);
+      this.setState({ view: ViewType.YEAR_RANGE });
     },
     goToMonthView: function goToMonthView() {
-      this.nextView(ViewType.MONTH);
+      this.setState({ view: ViewType.MONTH });
     },
     onDateSelected: function onDateSelected(year, month, date) {
       var selectedDate = moment({ year: year, month: month, date: date });
-      if (!selectedDate.isValid()) {
-        selectedDate = moment({ year: year, month: month }).endOf('month');
-      }
-
-      this.setState({ selectedDate: selectedDate });
+      this.setState({ selectedDate: selectedDate, year: year, month: month });
       this.props.onDateSelected(selectedDate);
     },
     onYearAndMonthSelected: function onYearAndMonthSelected(year, month) {
-      var selectedDate = this.state.selectedDate;
-      if (selectedDate) {
-        this.onDateSelected(year, month, selectedDate.date());
-      } else {
-        this.onDateSelected(year, month, 1);
-      }
-      this.goToYearView();
+      this.setState({ year: year, month: month });
+      this.goToMonthView();
     },
     onYearSelected: function onYearSelected(year) {
-      var selectedDate = this.state.selectedDate;
-      if (selectedDate) {
-        this.onDateSelected(year, selectedDate.month(), selectedDate.date());
-      } else {
-        this.onDateSelected(year, 0, 1);
-      }
+      this.setState({ year: year });
       this.goToYearView();
     },
     render: function render() {
-      var _state = this.state;
-      var viewType = _state.viewType;
-      var selectedDate = _state.selectedDate;
+      var _state2 = this.state;
+      var view = _state2.view;
+      var selectedDate = _state2.selectedDate;
+      var year = _state2.year;
+      var month = _state2.month;
 
-      var view = undefined;
-      if (viewType === ViewType.MONTH) {
-        view = React.createElement(MonthView, { selectedDate: selectedDate,
+      if (view === ViewType.MONTH) {
+        return React.createElement(MonthView, { selectedDate: selectedDate,
+          year: year,
+          month: month,
           onClickTopLabel: this.goToYearView,
           onSelected: this.onDateSelected });
-      } else if (viewType === ViewType.YEAR) {
-        view = React.createElement(YearView, { selectedDate: selectedDate,
-          onClickTopLabel: this.goToYearRangeView,
-          onSelected: this.onYearAndMonthSelected });
-      } else {
-        // ViewType.YEAR_RANGE
-        view = React.createElement(YearRangeView, { selectedDate: selectedDate,
-          onClickTopLabel: this.goToMonthView,
-          onSelected: this.onYearSelected });
       }
 
-      return view;
+      if (view === ViewType.YEAR) {
+        return React.createElement(YearView, { selectedDate: selectedDate,
+          year: year,
+          onClickTopLabel: this.goToYearRangeView,
+          onSelected: this.onYearAndMonthSelected });
+      }
+
+      // ViewType.YEAR_RANGE
+      return React.createElement(YearRangeView, { selectedDate: selectedDate,
+        year: year,
+        onClickTopLabel: this.goToMonthView,
+        onSelected: this.onYearSelected });
     }
   });
 
@@ -549,7 +572,9 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
           return;
         }
 
-        ReactDOM.render(React.createElement(Picker, { selectedDate: selectedDate, onDateSelected: this.onDateSelected }), this.wrapper);
+        ReactDOM.render(React.createElement(Picker, { selectedDate: selectedDate,
+          view: ViewType.MONTH,
+          onDateSelected: this.onDateSelected }), this.wrapper);
 
         this.isVisible = true;
         this.updatePosition();
@@ -609,17 +634,17 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
      * @returns {Datepicker}
      */
     install: function install(el) {
-      var _ref4 = arguments.length <= 1 || arguments[1] === undefined ? {} : arguments[1];
+      var _ref6 = arguments.length <= 1 || arguments[1] === undefined ? {} : arguments[1];
 
-      var _ref4$format = _ref4.format;
-      var format = _ref4$format === undefined ? 'MMMM D YYYY' : _ref4$format;
+      var _ref6$format = _ref6.format;
+      var format = _ref6$format === undefined ? 'MMMM D YYYY' : _ref6$format;
 
       var picker = new Datepicker(el, function (date) {
         el.value = date.format(format); // eslint-disable-line no-param-reassign
       });
 
       // prevent manual editing
-      el.addEventListener('keypress', function (evt) {
+      el.addEventListener('keydown', function (evt) {
         evt.stopPropagation();
         evt.preventDefault();
       });
@@ -635,7 +660,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
       // show picker when input is focused
       el.addEventListener('click', function (evt) {
         var date = moment(el.value, format);
-        picker.show(date);
+        picker.show(date.isValid() ? date : undefined);
         window.addEventListener('click', clickHandler, true);
 
         // stop propagation to not to trigger clickHandler
