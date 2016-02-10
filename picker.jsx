@@ -25,6 +25,28 @@
      */
     objectValues (object = {}) {
       return Object.keys(object).map(key => object[key]);
+    },
+
+    /**
+     * Group cells into rows.
+     * @param {Array} cells list of table cells
+     * @param {number} rowSize number of elements in a row
+     * @returns {Array} list of table rows
+     */
+    groupIntoRows (cells, rowSize) {
+      let rows = [];
+      let rowsCount = cells.length / rowSize;
+
+      for (let row = 0; row < rowsCount; row += 1) {
+        let firstRowElPos = row * rowSize;
+        rows.push(
+          <tr key={row}>
+            {cells.slice(firstRowElPos, firstRowElPos + rowSize)}
+          </tr>
+        );
+      }
+
+      return rows;
     }
   };
 
@@ -315,20 +337,9 @@
         );
       }
 
-      let rows = [];
-      for (let i = 0; i < 12; i += 3) {
-        rows.push(
-          <tr key={i}>
-            {cells[i]}
-            {cells[i + 1]}
-            {cells[i + 2]}
-          </tr>
-        );
-      }
-
       return (
         <table onClick={this.onClick}>
-          <tbody>{rows}</tbody>
+          <tbody>{Utils.groupIntoRows(cells, 3)}</tbody>
         </table>
       );
     },
@@ -430,21 +441,9 @@
         );
       }
 
-      let rows = [];
-      for (let i = 0; i < YEARS_RANGE; i += 4) {
-        rows.push(
-          <tr key={i}>
-            {cells[i]}
-            {cells[i + 1]}
-            {cells[i + 2]}
-            {cells[i + 3]}
-          </tr>
-        );
-      }
-
       return (
         <table onClick={this.onClick}>
-          <tbody>{rows}</tbody>
+          <tbody>{Utils.groupIntoRows(cells, 4)}</tbody>
         </table>
       );
     },

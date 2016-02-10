@@ -36,6 +36,28 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
       return Object.keys(object).map(function (key) {
         return object[key];
       });
+    },
+
+    /**
+     * Group cells into rows.
+     * @param {Array} cells list of table cells
+     * @param {number} rowSize number of elements in a row
+     * @returns {Array} list of table rows
+     */
+    groupIntoRows: function groupIntoRows(cells, rowSize) {
+      var rows = [];
+      var rowsCount = cells.length / rowSize;
+
+      for (var row = 0; row < rowsCount; row += 1) {
+        var firstRowElPos = row * rowSize;
+        rows.push(React.createElement(
+          'tr',
+          { key: row },
+          cells.slice(firstRowElPos, firstRowElPos + rowSize)
+        ));
+      }
+
+      return rows;
     }
   };
 
@@ -342,24 +364,13 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
         ));
       }
 
-      var rows = [];
-      for (var i = 0; i < 12; i += 3) {
-        rows.push(React.createElement(
-          'tr',
-          { key: i },
-          cells[i],
-          cells[i + 1],
-          cells[i + 2]
-        ));
-      }
-
       return React.createElement(
         'table',
         { onClick: this.onClick },
         React.createElement(
           'tbody',
           null,
-          rows
+          Utils.groupIntoRows(cells, 3)
         )
       );
     },
@@ -457,25 +468,13 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
         ));
       }
 
-      var rows = [];
-      for (var i = 0; i < YEARS_RANGE; i += 4) {
-        rows.push(React.createElement(
-          'tr',
-          { key: i },
-          cells[i],
-          cells[i + 1],
-          cells[i + 2],
-          cells[i + 3]
-        ));
-      }
-
       return React.createElement(
         'table',
         { onClick: this.onClick },
         React.createElement(
           'tbody',
           null,
-          rows
+          Utils.groupIntoRows(cells, 4)
         )
       );
     },
