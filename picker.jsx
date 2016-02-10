@@ -68,12 +68,11 @@
 
     getInitialState () {
       let { selectedDate } = this.props;
-      return {
-        range: moment({
-          year: selectedDate.year(),
-          month: selectedDate.month()
-        })
-      };
+
+      let range = selectedDate ? moment(selectedDate) : moment();
+      range.startOf('month');
+
+      return { range };
     },
 
     nextRange () {
@@ -89,17 +88,22 @@
     },
 
     showToday () {
-      let now = moment();
       this.setState({
-        range: moment({
-          year: now.year(),
-          month: now.month()
-        })
+        range: moment().startOf('month')
       });
     },
 
+    onClick ({ target }) {
+      if (target.nodeName === 'TD') {
+        let year = target.getAttribute('data-year');
+        let month = target.getAttribute('data-month');
+        let date = target.getAttribute('data-date');
+        this.props.onSelected(year, month, date);
+      }
+    },
+
     generateWeekItems (date, currentMonth) {
-      let { selectedDate, onDateSelected } = this.props;
+      let { selectedDate } = this.props;
 
       let items = [];
 
@@ -135,7 +139,9 @@
         items.push(
           <td key={day.date()}
               className={classes.join(' ')}
-              onClick={onDateSelected.bind(null, day)}
+              data-year={day.year()}
+              data-month={day.month()}
+              data-date={day.date()}
               dangerouslySetInnerHTML={{ __html: dayStr }} >
           </td>
         );
@@ -154,7 +160,7 @@
       }
 
       return (
-        <table>
+        <table onClick={this.onClick}>
           <thead>
             <tr>
               {moment.weekdaysShort().map(
@@ -191,9 +197,10 @@
     displayName: 'YearView',
 
     getInitialState () {
-      return {
-        year: this.props.selectedDate.year()
-      };
+      let { selectedDate } = this.props;
+      let year = selectedDate ? selectedDate.year() : moment().year();
+
+      return { year };
     },
 
     nextRange () {
@@ -214,23 +221,23 @@
       });
     },
 
+    onClick ({ target }) {
+      if (target.nodeName === 'TD') {
+        let year = target.getAttribute('data-year');
+        let month = target.getAttribute('data-month');
+        this.props.onSelected(year, month);
+      }
+    },
+
     generateTable () {
-      let { selectedDate, onDateSelected } = this.props;
+      let { selectedDate } = this.props;
       let { year } = this.state;
 
       let today = moment();
 
       let cells = [];
-      for (let i = 0; i < 12; i += 1) {
-        let day = moment({
-          year,
-          month: i,
-          date: selectedDate.date()
-        });
-        // ensure that we're not overflowing max date in month
-        if (!day.isValid()) {
-          day = moment({ year, month: i }).endOf('month');
-        }
+      for (let month = 0; month < 12; month += 1) {
+        let day = moment({ year, month });
 
         let classes = [];
 
@@ -249,8 +256,9 @@
         let label = day.format('MMM');
         cells.push(
           <td key={label}
-              className={classes.join(' ')}
-              onClick={onDateSelected.bind(null, day)}>
+              data-year={year}
+              data-month={month}
+              className={classes.join(' ')} >
             {label}
           </td>
         );
@@ -268,7 +276,7 @@
       }
 
       return (
-        <table>
+        <table onClick={this.onClick}>
           <tbody>{rows}</tbody>
         </table>
       );
@@ -301,8 +309,10 @@
     displayName: 'YearRangeView',
 
     getInitialState () {
+      let { selectedDate } = this.props;
+      let year = selectedDate ? selectedDate.year() : moment().year();
       return {
-        rangeStart: this.props.selectedDate.year() - 8
+        rangeStart: year - 8
       };
     },
 
@@ -324,47 +334,39 @@
       });
     },
 
+    onClick ({ target }) {
+      if (target.nodeName === 'TD') {
+        this.props.onSelected(target.getAttribute('data-year'));
+      }
+    },
+
     generateTable () {
-      let { selectedDate, onDateSelected } = this.props;
+      let { selectedDate } = this.props;
       let { rangeStart } = this.state;
 
-      let today = moment();
+      let currentYear = moment().year();
 
       let cells = [];
       for (let i = 0; i < YEARS_RANGE; i += 1) {
-        let day = moment({
-          year: rangeStart + i,
-          month: selectedDate.month(),
-          date: selectedDate.date()
-        });
-
-        // ensure that we're not overflowing max date in month
-        if (!day.isValid()) {
-          day = moment({
-            year: rangeStart + i,
-            month: selectedDate.month()
-          }).endOf('month');
-        }
+        let year = rangeStart + i;
 
         let classes = [];
 
         // highlight selected year
-        // check year
-        if (day.isSame(selectedDate, 'year')) {
+        if (selectedDate && selectedDate.year() === year) {
           classes.push('is-selected');
         }
 
         // highlight current year
-        // check year
-        if (day.isSame(today, 'year')) {
+        if (currentYear === year) {
           classes.push('is-today');
         }
 
         cells.push(
-          <td key={day.year()}
-              className={classes.join(' ')}
-              onClick={onDateSelected.bind(null, day)}>
-            {day.year()}
+          <td key={year}
+              data-year={year}
+              className={classes.join(' ')} >
+            {year}
           </td>
         );
       }
@@ -382,7 +384,7 @@
       }
 
       return (
-        <table>
+        <table onClick={this.onClick}>
           <tbody>{rows}</tbody>
         </table>
       );
@@ -424,7 +426,7 @@
     getInitialState () {
       return {
         viewType: ViewType.MONTH,
-        selectedDate: moment()
+        selectedDate: null
       };
     },
 
@@ -444,18 +446,33 @@
       this.nextView(ViewType.MONTH);
     },
 
-    onDateSelected (selectedDate) {
+    onDateSelected (year, month, date) {
+      let selectedDate = moment({ year, month, date });
+      if (!selectedDate.isValid()) {
+        selectedDate = moment({ year, month }).endOf('month');
+      }
+
       this.setState({ selectedDate });
       this.props.onDateSelected(selectedDate);
     },
 
-    onYearSelected (selectedDate) {
-      this.onDateSelected(selectedDate);
-      this.goToMonthView();
+    onYearAndMonthSelected (year, month) {
+      let selectedDate = this.state.selectedDate;
+      if (selectedDate) {
+        this.onDateSelected(year, month, selectedDate.date());
+      } else {
+        this.onDateSelected(year, month, 1);
+      }
+      this.goToYearView();
     },
 
-    onYearFromRangeSelected (selectedDate) {
-      this.onDateSelected(selectedDate);
+    onYearSelected (year) {
+      let selectedDate = this.state.selectedDate;
+      if (selectedDate) {
+        this.onDateSelected(year, selectedDate.month(), selectedDate.date());
+      } else {
+        this.onDateSelected(year, 0, 1);
+      }
       this.goToYearView();
     },
 
@@ -467,19 +484,19 @@
         view = (
           <MonthView selectedDate={selectedDate}
                      onClickTopLabel={this.goToYearView}
-                     onDateSelected={this.onDateSelected} />
+                     onSelected={this.onDateSelected} />
         );
       } else if (viewType === ViewType.YEAR) {
         view = (
           <YearView selectedDate={selectedDate}
                     onClickTopLabel={this.goToYearRangeView}
-                    onDateSelected={this.onYearSelected} />
+                    onSelected={this.onYearAndMonthSelected} />
         );
       } else { // ViewType.YEAR_RANGE
         view = (
           <YearRangeView selectedDate={selectedDate}
                          onClickTopLabel={this.goToMonthView}
-                         onDateSelected={this.onYearFromRangeSelected} />
+                         onSelected={this.onYearSelected} />
         );
       }
 
@@ -498,24 +515,27 @@
     constructor (el, onDateSelected) {
       this.el = el;
       this.isVisible = false;
+      this.onDateSelected = onDateSelected;
 
       this.wrapper = document.createElement('div');
       this.wrapper.classList.add('Datepicker-wrapper');
       document.body.appendChild(this.wrapper);
-
-      ReactDOM.render(
-        <Picker onDateSelected={onDateSelected}/>,
-        this.wrapper
-      );
     }
 
     /**
      * Show datepicker under text input.
+     * @param {Moment} [selectedDate] currently selected date
      */
-    show () {
+    show (selectedDate) {
       if (this.isVisible) {
         return;
       }
+
+      ReactDOM.render(
+        <Picker selectedDate={selectedDate} onDateSelected={this.onDateSelected}/>,
+        this.wrapper
+      );
+
       this.isVisible = true;
       this.updatePosition();
 
@@ -557,12 +577,12 @@
      * @param {DOMElement} el text input
      * @returns {Datepicker}
      */
-    install (el) {
+    install (el, { format = 'MMMM D YYYY' } = {}) {
       let picker = new Datepicker(el, function (date) {
-        el.value = date.format('MMMM D YYYY'); // eslint-disable-line no-param-reassign
+        el.value = date.format(format); // eslint-disable-line no-param-reassign
       });
 
-      // prevent editing
+      // prevent manual editing
       el.addEventListener('keypress', function (evt) {
         evt.stopPropagation();
         evt.preventDefault();
@@ -578,7 +598,8 @@
 
       // show picker when input is focused
       el.addEventListener('click', function (evt) {
-        picker.show();
+        let date = moment(el.value, format);
+        picker.show(date);
         window.addEventListener('click', clickHandler, true);
 
         // stop propagation to not to trigger clickHandler
@@ -591,6 +612,7 @@
           picker.updatePosition();
         }
       });
+
       return picker;
     }
   };

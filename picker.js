@@ -81,12 +81,10 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
     getInitialState: function getInitialState() {
       var selectedDate = this.props.selectedDate;
 
-      return {
-        range: moment({
-          year: selectedDate.year(),
-          month: selectedDate.month()
-        })
-      };
+      var range = selectedDate ? moment(selectedDate) : moment();
+      range.startOf('month');
+
+      return { range: range };
     },
     nextRange: function nextRange() {
       this.setState({
@@ -99,18 +97,22 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
       });
     },
     showToday: function showToday() {
-      var now = moment();
       this.setState({
-        range: moment({
-          year: now.year(),
-          month: now.month()
-        })
+        range: moment().startOf('month')
       });
     },
+    onClick: function onClick(_ref) {
+      var target = _ref.target;
+
+      if (target.nodeName === 'TD') {
+        var year = target.getAttribute('data-year');
+        var month = target.getAttribute('data-month');
+        var date = target.getAttribute('data-date');
+        this.props.onSelected(year, month, date);
+      }
+    },
     generateWeekItems: function generateWeekItems(date, currentMonth) {
-      var _props2 = this.props;
-      var selectedDate = _props2.selectedDate;
-      var onDateSelected = _props2.onDateSelected;
+      var selectedDate = this.props.selectedDate;
 
       var items = [];
 
@@ -145,7 +147,9 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 
         items.push(React.createElement("td", { key: day.date(),
           className: classes.join(' '),
-          onClick: onDateSelected.bind(null, day),
+          "data-year": day.year(),
+          "data-month": day.month(),
+          "data-date": day.date(),
           dangerouslySetInnerHTML: { __html: dayStr } }));
       }
 
@@ -166,7 +170,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 
       return React.createElement(
         "table",
-        null,
+        { onClick: this.onClick },
         React.createElement(
           "thead",
           null,
@@ -213,9 +217,11 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
     displayName: 'YearView',
 
     getInitialState: function getInitialState() {
-      return {
-        year: this.props.selectedDate.year()
-      };
+      var selectedDate = this.props.selectedDate;
+
+      var year = selectedDate ? selectedDate.year() : moment().year();
+
+      return { year: year };
     },
     nextRange: function nextRange() {
       this.setState({
@@ -232,25 +238,24 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
         year: moment().year()
       });
     },
+    onClick: function onClick(_ref2) {
+      var target = _ref2.target;
+
+      if (target.nodeName === 'TD') {
+        var year = target.getAttribute('data-year');
+        var month = target.getAttribute('data-month');
+        this.props.onSelected(year, month);
+      }
+    },
     generateTable: function generateTable() {
-      var _props3 = this.props;
-      var selectedDate = _props3.selectedDate;
-      var onDateSelected = _props3.onDateSelected;
+      var selectedDate = this.props.selectedDate;
       var year = this.state.year;
 
       var today = moment();
 
       var cells = [];
-      for (var i = 0; i < 12; i += 1) {
-        var day = moment({
-          year: year,
-          month: i,
-          date: selectedDate.date()
-        });
-        // ensure that we're not overflowing max date in month
-        if (!day.isValid()) {
-          day = moment({ year: year, month: i }).endOf('month');
-        }
+      for (var month = 0; month < 12; month += 1) {
+        var day = moment({ year: year, month: month });
 
         var classes = [];
 
@@ -270,8 +275,9 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
         cells.push(React.createElement(
           "td",
           { key: label,
-            className: classes.join(' '),
-            onClick: onDateSelected.bind(null, day) },
+            "data-year": year,
+            "data-month": month,
+            className: classes.join(' ') },
           label
         ));
       }
@@ -289,7 +295,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 
       return React.createElement(
         "table",
-        null,
+        { onClick: this.onClick },
         React.createElement(
           "tbody",
           null,
@@ -324,8 +330,11 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
     displayName: 'YearRangeView',
 
     getInitialState: function getInitialState() {
+      var selectedDate = this.props.selectedDate;
+
+      var year = selectedDate ? selectedDate.year() : moment().year();
       return {
-        rangeStart: this.props.selectedDate.year() - 8
+        rangeStart: year - 8
       };
     },
     nextRange: function nextRange() {
@@ -343,50 +352,41 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
         rangeStart: moment().year() - 8
       });
     },
+    onClick: function onClick(_ref3) {
+      var target = _ref3.target;
+
+      if (target.nodeName === 'TD') {
+        this.props.onSelected(target.getAttribute('data-year'));
+      }
+    },
     generateTable: function generateTable() {
-      var _props4 = this.props;
-      var selectedDate = _props4.selectedDate;
-      var onDateSelected = _props4.onDateSelected;
+      var selectedDate = this.props.selectedDate;
       var rangeStart = this.state.rangeStart;
 
-      var today = moment();
+      var currentYear = moment().year();
 
       var cells = [];
       for (var i = 0; i < YEARS_RANGE; i += 1) {
-        var day = moment({
-          year: rangeStart + i,
-          month: selectedDate.month(),
-          date: selectedDate.date()
-        });
-
-        // ensure that we're not overflowing max date in month
-        if (!day.isValid()) {
-          day = moment({
-            year: rangeStart + i,
-            month: selectedDate.month()
-          }).endOf('month');
-        }
+        var year = rangeStart + i;
 
         var classes = [];
 
         // highlight selected year
-        // check year
-        if (day.isSame(selectedDate, 'year')) {
+        if (selectedDate && selectedDate.year() === year) {
           classes.push('is-selected');
         }
 
         // highlight current year
-        // check year
-        if (day.isSame(today, 'year')) {
+        if (currentYear === year) {
           classes.push('is-today');
         }
 
         cells.push(React.createElement(
           "td",
-          { key: day.year(),
-            className: classes.join(' '),
-            onClick: onDateSelected.bind(null, day) },
-          day.year()
+          { key: year,
+            "data-year": year,
+            className: classes.join(' ') },
+          year
         ));
       }
 
@@ -404,7 +404,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 
       return React.createElement(
         "table",
-        null,
+        { onClick: this.onClick },
         React.createElement(
           "tbody",
           null,
@@ -448,7 +448,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
     getInitialState: function getInitialState() {
       return {
         viewType: ViewType.MONTH,
-        selectedDate: moment()
+        selectedDate: null
       };
     },
     nextView: function nextView(viewType) {
@@ -463,16 +463,31 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
     goToMonthView: function goToMonthView() {
       this.nextView(ViewType.MONTH);
     },
-    onDateSelected: function onDateSelected(selectedDate) {
+    onDateSelected: function onDateSelected(year, month, date) {
+      var selectedDate = moment({ year: year, month: month, date: date });
+      if (!selectedDate.isValid()) {
+        selectedDate = moment({ year: year, month: month }).endOf('month');
+      }
+
       this.setState({ selectedDate: selectedDate });
       this.props.onDateSelected(selectedDate);
     },
-    onYearSelected: function onYearSelected(selectedDate) {
-      this.onDateSelected(selectedDate);
-      this.goToMonthView();
+    onYearAndMonthSelected: function onYearAndMonthSelected(year, month) {
+      var selectedDate = this.state.selectedDate;
+      if (selectedDate) {
+        this.onDateSelected(year, month, selectedDate.date());
+      } else {
+        this.onDateSelected(year, month, 1);
+      }
+      this.goToYearView();
     },
-    onYearFromRangeSelected: function onYearFromRangeSelected(selectedDate) {
-      this.onDateSelected(selectedDate);
+    onYearSelected: function onYearSelected(year) {
+      var selectedDate = this.state.selectedDate;
+      if (selectedDate) {
+        this.onDateSelected(year, selectedDate.month(), selectedDate.date());
+      } else {
+        this.onDateSelected(year, 0, 1);
+      }
       this.goToYearView();
     },
     render: function render() {
@@ -484,16 +499,16 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
       if (viewType === ViewType.MONTH) {
         view = React.createElement(MonthView, { selectedDate: selectedDate,
           onClickTopLabel: this.goToYearView,
-          onDateSelected: this.onDateSelected });
+          onSelected: this.onDateSelected });
       } else if (viewType === ViewType.YEAR) {
         view = React.createElement(YearView, { selectedDate: selectedDate,
           onClickTopLabel: this.goToYearRangeView,
-          onDateSelected: this.onYearSelected });
+          onSelected: this.onYearAndMonthSelected });
       } else {
         // ViewType.YEAR_RANGE
         view = React.createElement(YearRangeView, { selectedDate: selectedDate,
           onClickTopLabel: this.goToMonthView,
-          onDateSelected: this.onYearFromRangeSelected });
+          onSelected: this.onYearSelected });
       }
 
       return view;
@@ -515,24 +530,27 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 
       this.el = el;
       this.isVisible = false;
+      this.onDateSelected = onDateSelected;
 
       this.wrapper = document.createElement('div');
       this.wrapper.classList.add('Datepicker-wrapper');
       document.body.appendChild(this.wrapper);
-
-      ReactDOM.render(React.createElement(Picker, { onDateSelected: onDateSelected }), this.wrapper);
     }
 
     /**
      * Show datepicker under text input.
+     * @param {Moment} [selectedDate] currently selected date
      */
 
     _createClass(Datepicker, [{
       key: "show",
-      value: function show() {
+      value: function show(selectedDate) {
         if (this.isVisible) {
           return;
         }
+
+        ReactDOM.render(React.createElement(Picker, { selectedDate: selectedDate, onDateSelected: this.onDateSelected }), this.wrapper);
+
         this.isVisible = true;
         this.updatePosition();
 
@@ -591,11 +609,16 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
      * @returns {Datepicker}
      */
     install: function install(el) {
+      var _ref4 = arguments.length <= 1 || arguments[1] === undefined ? {} : arguments[1];
+
+      var _ref4$format = _ref4.format;
+      var format = _ref4$format === undefined ? 'MMMM D YYYY' : _ref4$format;
+
       var picker = new Datepicker(el, function (date) {
-        el.value = date.format('MMMM D YYYY'); // eslint-disable-line no-param-reassign
+        el.value = date.format(format); // eslint-disable-line no-param-reassign
       });
 
-      // prevent editing
+      // prevent manual editing
       el.addEventListener('keypress', function (evt) {
         evt.stopPropagation();
         evt.preventDefault();
@@ -611,7 +634,8 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 
       // show picker when input is focused
       el.addEventListener('click', function (evt) {
-        picker.show();
+        var date = moment(el.value, format);
+        picker.show(date);
         window.addEventListener('click', clickHandler, true);
 
         // stop propagation to not to trigger clickHandler
@@ -624,6 +648,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
           picker.updatePosition();
         }
       });
+
       return picker;
     }
   };
